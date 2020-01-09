@@ -7,5 +7,8 @@ public enum ValueType {
     NULL,
     BOOLEAN,
     ARRAY,
-    OBJECT
+    OBJECT,
+    USERDEFINEDATOMIC,
+    USERDEFINEDARRAY,
+    USERDEFINEDOBJECT,
 }
