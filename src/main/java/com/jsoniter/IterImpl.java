@@ -159,6 +159,7 @@ class IterImpl {
         for (; ; ) {
             byte c = iter.buf[i++];
             switch (c) {
+            //on whitespace -> skip
                 case ' ':
                 case '\n':
                 case '\r':

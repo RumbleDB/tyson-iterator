@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ public class JsonIterator implements Closeable {
     public Config configCache;
     private static boolean isStreamingEnabled = false;
     final static ValueType[] valueTypes = new ValueType[256];
+	final static TypeDeclaration[] typeDeclarations = new TypeDeclaration[256];
+
     InputStream in;
     byte[] buf;
     int head;
@@ -51,7 +54,9 @@ public class JsonIterator implements Closeable {
         valueTypes['n'] = ValueType.NULL;
         valueTypes['['] = ValueType.ARRAY;
         valueTypes['{'] = ValueType.OBJECT;
+    	typeDeclarations['('] = TypeDeclaration.TYPEDECLARATION;
     }
+    
 
     private JsonIterator(InputStream in, byte[] buf, int head, int tail) {
         this.in = in;
@@ -116,6 +121,7 @@ public class JsonIterator implements Closeable {
         }
     }
 
+    //go back one reading position
     final void unreadByte() {
         if (head == 0) {
             throw reportError("unreadByte", "unread too many bytes");
@@ -144,17 +150,35 @@ public class JsonIterator implements Closeable {
         String peek = new String(buf, peekStart, head - peekStart);
         return "head: " + head + ", peek: " + peek + ", buf: " + new String(buf);
     }
-
+    
+    /*if we expect to read a null value, anything not beginning with a n is unread and false is returned.
+     *If the null value is inside quotes, we read the value and check if it is equal to "null".
+     *If yes, true is returned.
+     *If no, false is returned.
+     *else true is returned and we skip the whole null input 
+     */
     public final boolean readNull() throws IOException {
         byte c = IterImpl.nextToken(this);
         if (c != 'n') {
-            unreadByte();
+        	if(c == '"') {
+        		unreadByte();
+        		String str = readString();
+        		if(str.equals("null")) {
+        			return true;
+        		}
+        	} else unreadByte();
             return false;
         }
         IterImpl.skipFixedBytes(this, 3); // null
         return true;
     }
-
+    
+    /*if we expect to read a boolean value, beginning to read 't' leads to returning true (because boolean value is true) 
+    * and skipping the bytes belonging to the true value.
+    * Beginning to read 'f' leads to returning false (boolean value is false)
+    * and skipping the bytes belonging to the false value.
+    * On all other occasions an error is reported.
+    */
     public final boolean readBoolean() throws IOException {
         byte c = IterImpl.nextToken(this);
         if ('t' == c) {
@@ -165,7 +189,25 @@ public class JsonIterator implements Closeable {
             IterImpl.skipFixedBytes(this, 4); // false
             return false;
         }
+        if(c == '"') {
+    		unreadByte();
+    		String str = readString();
+    		if(str.equals("true")) {
+    			return true;
+    		} else if(str.contentEquals("false")) {
+    			return false;
+    		}
+    	}
         throw reportError("readBoolean", "expect t or f, found: " + c);
+    }
+   
+    /* 
+     * If we expect to read a user defined atomic value, we just call 
+     * IterImplString.readString(this) because all user-defined atomic values
+     * are represented by strings
+     */
+    public final String readLiteral() throws IOException {
+    	return IterImplString.readString(this);
     }
 
     public final short readShort() throws IOException {
@@ -289,8 +331,18 @@ public class JsonIterator implements Closeable {
             ValueType valueType = whatIsNext();
             switch (valueType) {
                 case STRING:
-                    return readString();
+                	String stringContent = readString();
+                	if(stringContent.equals("null")) {
+                		return null;
+                	} else if (stringContent.contentEquals("true")) {
+                		return true;
+                	} else if (stringContent.contentEquals("false")) {
+                		return false;
+                	}
+                	//TODO: look at number case
+                    return stringContent;
                 case NUMBER:
+                	//TODO: look at number case (integer, double, decimal)
                     IterImplForStreaming.numberChars numberChars = IterImplForStreaming.readNumber(this);
                     String numberStr = new String(numberChars.chars, 0, numberChars.charsLength);
                     Double number = Double.valueOf(numberStr);
@@ -312,13 +364,17 @@ public class JsonIterator implements Closeable {
                 case BOOLEAN:
                     return readBoolean();
                 case ARRAY:
+                case USERDEFINEDARRAY:
                     ArrayList list = new ArrayList(4);
                     readArrayCB(fillArray, list);
                     return list;
                 case OBJECT:
+                case USERDEFINEDOBJECT:
                     Map map = new HashMap(4);
                     readObjectCB(fillObject, map);
                     return map;
+                case USERDEFINEDATOMIC:
+                	return readLiteral();
                 default:
                     throw reportError("read", "unexpected value type: " + valueType);
             }
@@ -388,10 +444,208 @@ public class JsonIterator implements Closeable {
             throw reportError("read", "premature end");
         }
     }
+    
+    public String mapBuiltInValueTypeToString(ValueType v) {
+    	switch(v) {
+    	case STRING:
+    		return "string";
+    	case NUMBER:
+    		return "number";
+    	case NULL:
+    		return "null";
+    	case ARRAY:
+    		return "array";
+    	case OBJECT:
+    		return "object";
+    	case BOOLEAN:
+    		return "boolean";
+    	default: 
+    		return "";
+    	}
+    }
+    
+    /**
+     * Consume a type declaration in front of a value. 
+     * Startpoint is in front of opening parenthesis.
+     * 
+     * @return String typeName of declared type
+     * @throws IOException
+     */
+    public String readTypeDeclaration() throws IOException {
+    	//consume first byte of the type declaration (opening parenthesis)
+    	byte openParenthesis = IterImpl.nextToken(this);
+    	if(openParenthesis == '(') {
+    		//read the string type name
+    		String typeName = readString();
+    		if(IterImpl.nextToken(this) == ')') {
+    			//type declaration is closed with closing parenthesis, return type name
+    			return typeName;
+    		} else throw reportError("readTypeDeclaration", "no closing parenthesis");
+    	} else throw reportError("readTypeDeclaration", "no opening parenthesis");
+    }
+    
+    /**
+     * Consume a type declaration in front of a value. 
+     * Startpoint is after a closing parenthesis.
+     * Step back in the stream of bytes until complete type declaration can be read and
+     * return the name of the type. Needed to create userdefined types, 
+     * whose constructor waits for a typeName and a TysonInstance.
+     * 
+     * @return String typeName of declared type
+     * @throws IOException
+     */
+    public String readTypeName() throws IOException{
+    	int currentHead = this.head - 1;
+    	byte currentToken = this.buf[currentHead];
+    	//currentToken should point to closing parenthesis
+    	String typeNameReversed = "";
+    	//System.out.println(this.buf[3]);
+    	//System.out.println("currentToken: " +(char) currentToken);
+    	
+    	//skip whitespace characters
+    	boolean skipWhitespaces = false;
+    	skipWhitespaces = (currentToken == ' ' || currentToken == '\n' || currentToken == '\r' || currentToken == '\t' );
+    	while(skipWhitespaces) {
+    		currentHead -= 1;
+    		if(!(this.buf[currentHead]== ' ' || this.buf[currentHead] == '\n' || this.buf[currentHead] == '\r' || this.buf[currentHead] == '\t')) {
+    			skipWhitespaces = false;
+    		}
+    	}
+    	
+        currentToken = this.buf[currentHead];
+    	if(currentToken == ')') {
+    		//type declaration is present 
+    		//step back until opening parenthesis is found
+    		boolean continueBackwards = true;
+    		
+    		while(continueBackwards) {
+    			//go back one step
+        		currentHead -= 1;
+    			currentToken = this.buf[currentHead];
+    			//add currentToken to typeName string
+    			typeNameReversed = typeNameReversed + (char)currentToken;
+    			//did we find the matching opening parenthesis?
+    			if(currentToken == '(') {
+    				int peek = currentHead - 1;
+    				if(peek >= 0 && this.buf[peek] != '/') {
+        				//we found an opening parenthesis and it is not escaped, need to prevent next loop iteration
+    					continueBackwards = false;
+    				} 
+    				if(peek < 0) {
+    					//we are at the start of the stream, cannot go back any further
+    					continueBackwards = false;
+    				}
+    				//remove parenthesis from typeNameReversed
+    				typeNameReversed = typeNameReversed.substring(0, typeNameReversed.length() - 1);
+    			}
+    		}
+    		//typeNameReversed should now contain our type-name but in reverse
+    		//System.out.println(currentHead);
+    		String typeName = new StringBuffer(typeNameReversed).reverse().toString();
+    		return typeName;    		
+    		
+    	} else throw reportError("getTypeName", "trying to read type name of a built-in type");
 
+    }
+    
+    /**
+     * Gets the type information of the next value by looking at its first token.
+     * If a type is annotated, a typecheck between the annotated value and
+     * the provided value is performed and on mismatch, an error is reported.
+     * If no type annotation is provided, will simply return the implicit type of the next value.
+     * When returning, head is positioned right in front of the value (after a possible type annotation)
+     * 
+     * @return ValueType of the next value to come in the stream. 
+     * @throws IOException
+     */
     public ValueType whatIsNext() throws IOException {
         ValueType valueType = valueTypes[IterImpl.nextToken(this)];
         unreadByte();
+        //the next tokens are not representing a value but they could be a type declaration
+        if(valueType == ValueType.INVALID) {
+        	TypeDeclaration typeDecl = typeDeclarations[IterImpl.nextToken(this)];
+        	unreadByte();
+        	if(typeDecl == TypeDeclaration.TYPEDECLARATION) {
+            	String typeName = readTypeDeclaration();
+    //System.out.println("typeName is " + typeName);
+            	//token should now be after the type declaration
+            	ValueType providedValue = valueTypes[IterImpl.nextToken(this)];
+                unreadByte();
+            	//check if annotated value (typeName) corresponds to a built in type
+        		List<String> builtinTypes = Arrays.asList("string", "integer", "decimal", "double", "boolean", "null", "object", "array");
+    //System.out.println("builtin check is: " + builtinTypes.contains(typeName));
+            	boolean isBuiltInType = (builtinTypes.contains(typeName));
+            	//if yes, check if declared value (declaredValue) is of the same type
+            	if(isBuiltInType) {
+            		boolean isSameType = (mapBuiltInValueTypeToString(providedValue).equals(typeName)); //TODO: need to look at number case
+    //System.out.println("mapBuiltInValueTypeToString(providedValue) is: " + mapBuiltInValueTypeToString(providedValue));
+    //System.out.println("isSameType is: " + isSameType);
+            		if (isSameType) {
+            			//unread the byte we read when calling nextToken, iterator now at the end of type declaration
+            			unreadByte();
+            		} else {
+            			//we need to handle typed values that are quoted:
+            			unreadByte();
+            			if(providedValue == ValueType.STRING) {
+            				String val = readString();
+            				int backsteps = val.length()+3;
+            				//Handle the boolean cases
+            				if(val.contentEquals("true") || val.contentEquals("false")) {
+            					providedValue = ValueType.BOOLEAN;
+            				}
+            				
+            				//handle the null case
+            				else if(val.contentEquals("null")) {
+            					providedValue = ValueType.NULL;
+            				}
+            				//Handle the number cases, these could be "NaN", "+INF", "-INF" or any number
+            				//TODO
+            				
+            				//need to jump back all the bytes we already consumed in readString()
+            				this.head = this.head - backsteps;
+            				return providedValue;
+            			}
+            			
+            			throw reportError("whatIsNext, typecheck", "type mismatch");
+            		}
+            	} else {
+                //if no, we have a user defined type. Atom/Array/Object depending on the declaredValue
+    //System.out.println(providedValue);
+            		switch(providedValue) {
+            		case STRING:
+            			//declaredValue is String -> Atomic Type
+            			return providedValue = ValueType.USERDEFINEDATOMIC;
+            		case NUMBER:
+            			//declaredValue is Number -> Atomic Type
+            			return providedValue = ValueType.USERDEFINEDATOMIC;
+            		case BOOLEAN:
+            			//declaredValue is Boolean -> Atomic Type
+            			return providedValue = ValueType.USERDEFINEDATOMIC;
+            		case NULL:
+            			//declaredValue is Null -> Atomic Type
+            			return providedValue = ValueType.USERDEFINEDATOMIC;
+            		case ARRAY:
+            			//declaredValue is Array -> Array Type
+            			return providedValue = ValueType.USERDEFINEDARRAY;
+            		case OBJECT:
+            			//declaredValue is Object -> Object Type
+            			return providedValue = ValueType.USERDEFINEDOBJECT;
+                	default:
+                		throw reportError("whatIsNext, userdefined value", "provided value " +providedValue+" is not conformant notation");
+            		}
+            	}
+            	return providedValue;
+            }
+        }
+        
+        if(valueType == ValueType.NUMBER) {
+        	/*
+        	 * In this case we have a number because the value starts with a 
+        	 * -, 0, 1, 2, 3, 4, 5, 6, 7, 8 or 9, but no type is declared.
+        	 * We therefore need to look at the number to get the right type.
+        	 * TODO
+        	 */
+        }
         return valueType;
     }
 
