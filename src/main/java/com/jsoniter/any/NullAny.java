@@ -1,6 +1,6 @@
 package com.jsoniter.any;
 
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.output.JsonStream;
 
 import java.io.IOException;
@@ -12,8 +12,8 @@ class NullAny extends Any {
     public final static NullAny INSTANCE = new NullAny();
 
     @Override
-    public ValueType valueType() {
-        return ValueType.NULL;
+    public InputType valueType() {
+        return InputType.NULL;
     }
 
     @Override

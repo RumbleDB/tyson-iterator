@@ -3,7 +3,7 @@ package com.jsoniter.any;
 import com.jsoniter.JsonIteratorPool;
 import com.jsoniter.spi.JsonException;
 import com.jsoniter.JsonIterator;
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.output.JsonStream;
 import com.jsoniter.spi.TypeLiteral;
 
@@ -21,7 +21,7 @@ abstract class LazyAny extends Any {
         this.tail = tail;
     }
 
-    public abstract ValueType valueType();
+    public abstract InputType valueType();
 
     public final <T> T bindTo(T obj) {
         JsonIterator iter = parse();

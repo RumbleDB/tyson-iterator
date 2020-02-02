@@ -1,6 +1,6 @@
 package com.jsoniter.any;
 
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.output.JsonStream;
 
 import java.io.IOException;
@@ -21,8 +21,8 @@ class ArrayWrapperAny extends Any {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.ARRAY;
+    public InputType valueType() {
+        return InputType.ARRAY;
     }
 
     @Override
@@ -107,7 +107,7 @@ class ArrayWrapperAny extends Any {
             ArrayList<Any> result = new ArrayList<Any>();
             for (Any element : cache) {
                 Any mapped = element.get(keys, idx + 1);
-                if (mapped.valueType() != ValueType.INVALID) {
+                if (mapped.valueType() != InputType.INVALID) {
                     result.add(mapped);
                 }
             }

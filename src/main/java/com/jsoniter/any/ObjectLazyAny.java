@@ -25,8 +25,8 @@ class ObjectLazyAny extends LazyAny {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.OBJECT;
+    public InputType valueType() {
+        return InputType.OBJECT;
     }
 
     @Override
@@ -111,7 +111,7 @@ class ObjectLazyAny extends LazyAny {
             HashMap<String, Any> result = new HashMap<String, Any>();
             for (Map.Entry<String, Any> entry : cache.entrySet()) {
                 Any mapped = entry.getValue().get(keys, idx + 1);
-                if (mapped.valueType() != ValueType.INVALID) {
+                if (mapped.valueType() != InputType.INVALID) {
                     result.put(entry.getKey(), mapped);
                 }
             }

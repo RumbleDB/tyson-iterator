@@ -99,10 +99,10 @@ public class TestReadAny extends TestCase {
     public void test_get() throws IOException {
         assertEquals("100.5", JsonIterator.deserialize("100.5").get().toString());
         assertEquals("100.5", JsonIterator.deserialize("[100.5]").get(0).toString());
-        assertEquals(ValueType.INVALID, JsonIterator.deserialize("null").get(0).valueType());
-        assertEquals(ValueType.INVALID, JsonIterator.deserialize("[]").get(0).valueType());
-        assertEquals(ValueType.INVALID, JsonIterator.deserialize("[]").get("hello").valueType());
-        assertEquals(ValueType.INVALID, JsonIterator.deserialize("{}").get(0).valueType());
+        assertEquals(InputType.INVALID, JsonIterator.deserialize("null").get(0).valueType());
+        assertEquals(InputType.INVALID, JsonIterator.deserialize("[]").get(0).valueType());
+        assertEquals(InputType.INVALID, JsonIterator.deserialize("[]").get("hello").valueType());
+        assertEquals(InputType.INVALID, JsonIterator.deserialize("{}").get(0).valueType());
     }
 
     public void test_read_long() throws IOException {

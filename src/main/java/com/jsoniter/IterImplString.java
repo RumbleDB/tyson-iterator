@@ -58,11 +58,32 @@ class IterImplString {
             if (c == 'n') {
                 IterImpl.skipFixedBytes(iter, 3);
                 return null;
+            } else {
+            	String res = readUnquotedString(iter);
+            	//System.out.println("read unquoted string " + res);
+            	return (char)c + res;
             }
-            throw iter.reportError("readString", "expect string or null, but " + (char) c);
+            //throw iter.reportError("readString", "expect string or null, but " + (char) c);
         }
         int j = parse(iter);
         return new String(iter.reusableChars, 0, j);
+    }
+    
+    private static Boolean isWhitespace(byte c) {
+    	//System.out.println((char)c);
+    	return (c == ' ' || c == '\n' || c == '\r' || c == '\t' );
+    }
+    
+    public static String readUnquotedString(JsonIterator iter) throws IOException {
+    	byte currentToken = IterImpl.nextToken(iter);
+    	String output = "" ;
+    	while(!isWhitespace(currentToken)) {
+    		output = output +(char)currentToken;
+    		try {
+    		currentToken = IterImpl.nextToken(iter);
+    		} catch(ArrayIndexOutOfBoundsException e){return output;};
+    	}
+    	return output;
     }
 
     private static int parse(JsonIterator iter) throws IOException {

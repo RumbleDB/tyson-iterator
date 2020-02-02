@@ -76,7 +76,7 @@ public class TestDemo extends TestCase {
                 return new Decoder() {
                     @Override
                     public Object decode(JsonIterator iter1) throws IOException {
-                        if (iter1.whatIsNext() == ValueType.ARRAY) {
+                        if (iter1.whatIsNext() == InputType.ARRAY) {
                             if (iter1.readArray()) {
                                 // none empty array
                                 throw iter1.reportError("decode [] as null", "only empty array is expected");
@@ -116,9 +116,9 @@ public class TestDemo extends TestCase {
         assertTrue(iter.readArray());
         assertEquals("2", iter.readString());
         assertTrue(iter.readArray());
-        assertEquals(ValueType.ARRAY, iter.whatIsNext());
+        assertEquals(InputType.ARRAY, iter.whatIsNext());
         assertTrue(iter.readArray()); // start inner array
-        assertEquals(ValueType.STRING, iter.whatIsNext());
+        assertEquals(InputType.STRING, iter.whatIsNext());
         assertEquals("3", iter.readString());
         assertTrue(iter.readArray());
         assertEquals("4", iter.readString());
@@ -144,7 +144,7 @@ public class TestDemo extends TestCase {
         any = JsonIterator.deserialize("[{'score':100}, {'score':102}]".replace('\'', '"'));
         assertEquals(Long.class, any.get(0, "score").object().getClass());
         any = JsonIterator.deserialize("[{'score':100}, {'score':102}]".replace('\'', '"'));
-        assertEquals(ValueType.INVALID, any.get(0, "score", "number").valueType());
+        assertEquals(InputType.INVALID, any.get(0, "score", "number").valueType());
         any = JsonIterator.deserialize("[{'score':100}, {'score':102}]".replace('\'', '"'));
         for (Any record : any) {
             Any.EntryIterator entries = record.entries();

@@ -3,7 +3,7 @@ package com.jsoniter.any;
 import com.jsoniter.CodegenAccess;
 import com.jsoniter.JsonIterator;
 import com.jsoniter.JsonIteratorPool;
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.spi.JsonException;
 
 import java.io.IOException;
@@ -19,8 +19,8 @@ class StringLazyAny extends LazyAny {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.STRING;
+    public InputType valueType() {
+        return InputType.STRING;
     }
 
     @Override

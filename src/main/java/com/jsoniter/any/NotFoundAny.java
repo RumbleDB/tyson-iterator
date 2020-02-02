@@ -1,6 +1,6 @@
 package com.jsoniter.any;
 
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.output.JsonStream;
 import com.jsoniter.spi.JsonException;
 
@@ -29,8 +29,8 @@ class NotFoundAny extends Any {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.INVALID;
+    public InputType valueType() {
+        return InputType.INVALID;
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.jsoniter.any;
 import com.jsoniter.JsonIterator;
 import com.jsoniter.JsonIteratorPool;
 import com.jsoniter.spi.JsonException;
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -19,8 +19,8 @@ class DoubleLazyAny extends LazyAny {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.NUMBER;
+    public InputType valueType() {
+        return InputType.NUMBER;
     }
 
     @Override

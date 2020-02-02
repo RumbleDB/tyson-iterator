@@ -1,9 +1,12 @@
 package com.jsoniter;
 
-public enum ValueType {
+public enum InputType {
     INVALID,
     STRING,
     NUMBER,
+    INTEGER,
+    DECIMAL,
+    DOUBLE,
     NULL,
     BOOLEAN,
     ARRAY,
@@ -11,4 +14,5 @@ public enum ValueType {
     USERDEFINEDATOMIC,
     USERDEFINEDARRAY,
     USERDEFINEDOBJECT,
+    TYPEDECLARATION,
 }

@@ -54,7 +54,7 @@ public class TestObject extends TestCase {
         iter.reset(iter.buf);
         Any any = iter.readAny();
         assertEquals("hello", any.toString("field1"));
-        assertEquals(ValueType.INVALID, any.get("field2").valueType());
+        assertEquals(InputType.INVALID, any.get("field2").valueType());
         iter.reset(iter.buf);
         assertEquals("hello", ((Map) iter.read()).get("field1"));
     }
@@ -96,7 +96,7 @@ public class TestObject extends TestCase {
         assertNull(simpleObj);
         iter.reset(iter.buf);
         Any any = iter.readAny();
-        assertEquals(ValueType.NULL, any.get().valueType());
+        assertEquals(InputType.NULL, any.get().valueType());
     }
 
     public void test_native_field() throws IOException {

@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.annotations.Since;
 import com.google.gson.annotations.Until;
 import com.jsoniter.JsonIterator;
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.annotation.JsonIgnore;
 import com.jsoniter.annotation.JsonProperty;
 import com.jsoniter.output.JsonStream;
@@ -350,14 +350,14 @@ public class GsonCompatibilityMode extends Config {
             return new Decoder() {
                 @Override
                 public Object decode(JsonIterator iter) throws IOException {
-                    ValueType valueType = iter.whatIsNext();
-                    if (valueType == ValueType.STRING) {
+                    InputType valueType = iter.whatIsNext();
+                    if (valueType == InputType.STRING) {
                         return iter.readString();
-                    } else if (valueType == ValueType.NUMBER) {
+                    } else if (valueType == InputType.NUMBER) {
                         return iter.readNumberAsString();
-                    } else if (valueType == ValueType.BOOLEAN) {
+                    } else if (valueType == InputType.BOOLEAN) {
                         return iter.readBoolean() ? "true" : "false";
-                    } else if (valueType == ValueType.NULL) {
+                    } else if (valueType == InputType.NULL) {
                         iter.skip();
                         return null;
                     } else {
@@ -369,10 +369,10 @@ public class GsonCompatibilityMode extends Config {
             return new Decoder.BooleanDecoder() {
                 @Override
                 public boolean decodeBoolean(JsonIterator iter) throws IOException {
-                    ValueType valueType = iter.whatIsNext();
-                    if (valueType == ValueType.BOOLEAN) {
+                    InputType valueType = iter.whatIsNext();
+                    if (valueType == InputType.BOOLEAN) {
                         return iter.readBoolean();
-                    } else if (valueType == ValueType.NULL) {
+                    } else if (valueType == InputType.NULL) {
                         iter.skip();
                         return false;
                     } else {
@@ -384,10 +384,10 @@ public class GsonCompatibilityMode extends Config {
             return new Decoder.LongDecoder() {
                 @Override
                 public long decodeLong(JsonIterator iter) throws IOException {
-                    ValueType valueType = iter.whatIsNext();
-                    if (valueType == ValueType.NUMBER) {
+                    InputType valueType = iter.whatIsNext();
+                    if (valueType == InputType.NUMBER) {
                         return iter.readLong();
-                    } else if (valueType == ValueType.NULL) {
+                    } else if (valueType == InputType.NULL) {
                         iter.skip();
                         return 0;
                     } else {
@@ -399,10 +399,10 @@ public class GsonCompatibilityMode extends Config {
             return new Decoder.IntDecoder() {
                 @Override
                 public int decodeInt(JsonIterator iter) throws IOException {
-                    ValueType valueType = iter.whatIsNext();
-                    if (valueType == ValueType.NUMBER) {
+                    InputType valueType = iter.whatIsNext();
+                    if (valueType == InputType.NUMBER) {
                         return iter.readInt();
-                    } else if (valueType == ValueType.NULL) {
+                    } else if (valueType == InputType.NULL) {
                         iter.skip();
                         return 0;
                     } else {
@@ -414,10 +414,10 @@ public class GsonCompatibilityMode extends Config {
             return new Decoder.FloatDecoder() {
                 @Override
                 public float decodeFloat(JsonIterator iter) throws IOException {
-                    ValueType valueType = iter.whatIsNext();
-                    if (valueType == ValueType.NUMBER) {
+                    InputType valueType = iter.whatIsNext();
+                    if (valueType == InputType.NUMBER) {
                         return iter.readFloat();
-                    } else if (valueType == ValueType.NULL) {
+                    } else if (valueType == InputType.NULL) {
                         iter.skip();
                         return 0.0f;
                     } else {
@@ -429,10 +429,10 @@ public class GsonCompatibilityMode extends Config {
             return new Decoder.DoubleDecoder() {
                 @Override
                 public double decodeDouble(JsonIterator iter) throws IOException {
-                    ValueType valueType = iter.whatIsNext();
-                    if (valueType == ValueType.NUMBER) {
+                    InputType valueType = iter.whatIsNext();
+                    if (valueType == InputType.NUMBER) {
                         return iter.readDouble();
-                    } else if (valueType == ValueType.NULL) {
+                    } else if (valueType == InputType.NULL) {
                         iter.skip();
                         return 0.0d;
                     } else {

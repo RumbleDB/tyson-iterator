@@ -101,7 +101,7 @@ public class TestSpiTypeDecoder extends TestCase {
         JsoniterSpi.registerTypeDecoder(MyList.class, new Decoder() {
             @Override
             public Object decode(JsonIterator iter) throws IOException {
-                ValueType valueType = iter.whatIsNext();
+                InputType valueType = iter.whatIsNext();
                 MyList myList = new MyList();
                 switch (valueType) {
                     case ARRAY:

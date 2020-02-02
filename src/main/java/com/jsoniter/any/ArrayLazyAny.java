@@ -25,8 +25,8 @@ class ArrayLazyAny extends LazyAny {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.ARRAY;
+    public InputType valueType() {
+        return InputType.ARRAY;
     }
 
     @Override
@@ -112,7 +112,7 @@ class ArrayLazyAny extends LazyAny {
             ArrayList<Any> result = new ArrayList<Any>();
             for (Any element : cache) {
                 Any mapped = element.get(keys, idx + 1);
-                if (mapped.valueType() != ValueType.INVALID) {
+                if (mapped.valueType() != InputType.INVALID) {
                     result.add(mapped);
                 }
             }

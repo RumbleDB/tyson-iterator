@@ -1,6 +1,6 @@
 package com.jsoniter.any;
 
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.output.JsonStream;
 
 import java.io.IOException;
@@ -12,8 +12,8 @@ class FalseAny extends Any {
     public final static FalseAny INSTANCE = new FalseAny();
 
     @Override
-    public ValueType valueType() {
-        return ValueType.BOOLEAN;
+    public InputType valueType() {
+        return InputType.BOOLEAN;
     }
 
     @Override

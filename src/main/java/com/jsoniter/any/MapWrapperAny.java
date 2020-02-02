@@ -1,6 +1,6 @@
 package com.jsoniter.any;
 
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.output.JsonStream;
 
 import java.io.IOException;
@@ -21,8 +21,8 @@ class MapWrapperAny extends Any {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.OBJECT;
+    public InputType valueType() {
+        return InputType.OBJECT;
     }
 
     @Override
@@ -107,7 +107,7 @@ class MapWrapperAny extends Any {
             HashMap<String, Any> result = new HashMap<String, Any>();
             for (Map.Entry<String, Any> entry : cache.entrySet()) {
                 Any mapped = entry.getValue().get(keys, idx + 1);
-                if (mapped.valueType() != ValueType.INVALID) {
+                if (mapped.valueType() != InputType.INVALID) {
                     result.put(entry.getKey(), mapped);
                 }
             }

@@ -1,6 +1,6 @@
 package com.jsoniter.any;
 
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.output.JsonStream;
 
 import java.io.IOException;
@@ -17,8 +17,8 @@ class StringAny extends Any {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.STRING;
+    public InputType valueType() {
+        return InputType.STRING;
     }
 
     @Override

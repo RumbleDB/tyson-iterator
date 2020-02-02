@@ -2,7 +2,7 @@ package com.jsoniter.any;
 
 import com.jsoniter.output.CodegenAccess;
 import com.jsoniter.spi.JsonException;
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.output.JsonStream;
 import com.jsoniter.spi.Encoder;
 import com.jsoniter.spi.TypeLiteral;
@@ -98,7 +98,7 @@ public abstract class Any implements Iterable<Any> {
         }
     };
 
-    public abstract ValueType valueType();
+    public abstract InputType valueType();
 
     public <T> T bindTo(T obj, Object... keys) {
         return get(keys).bindTo(obj);
@@ -256,7 +256,7 @@ public abstract class Any implements Iterable<Any> {
 
     public abstract void writeTo(JsonStream stream) throws IOException;
 
-    protected JsonException reportUnexpectedType(ValueType toType) {
+    protected JsonException reportUnexpectedType(InputType toType) {
         throw new JsonException(String.format("can not convert %s to %s", valueType(), toType));
     }
 

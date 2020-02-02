@@ -1,6 +1,6 @@
 package com.jsoniter.output;
 
-import com.jsoniter.ValueType;
+import com.jsoniter.InputType;
 import com.jsoniter.any.*;
 import com.jsoniter.spi.JsonException;
 import junit.framework.TestCase;
@@ -21,7 +21,7 @@ public class TestAny extends TestCase {
 
     public void test_int() {
         Any any = Any.wrap(100);
-        assertEquals(ValueType.NUMBER, any.valueType());
+        assertEquals(InputType.NUMBER, any.valueType());
         assertEquals("100", JsonStream.serialize(any));
         assertEquals(Integer.valueOf(100), any.object());
         assertEquals(100, any.toInt());
@@ -36,7 +36,7 @@ public class TestAny extends TestCase {
 
     public void test_long() {
         Any any = Any.wrap(100L);
-        assertEquals(ValueType.NUMBER, any.valueType());
+        assertEquals(InputType.NUMBER, any.valueType());
         assertEquals("100", JsonStream.serialize(any));
         assertEquals(100, any.toInt());
         assertEquals(100L, any.toLong());
@@ -50,7 +50,7 @@ public class TestAny extends TestCase {
 
     public void test_float() {
         Any any = Any.wrap(100F);
-        assertEquals(ValueType.NUMBER, any.valueType());
+        assertEquals(InputType.NUMBER, any.valueType());
         assertEquals("100", JsonStream.serialize(any));
         assertEquals(100, any.toInt());
         assertEquals(100L, any.toLong());
@@ -64,7 +64,7 @@ public class TestAny extends TestCase {
 
     public void test_double() {
         Any any = Any.wrap(100D);
-        assertEquals(ValueType.NUMBER, any.valueType());
+        assertEquals(InputType.NUMBER, any.valueType());
         assertEquals("100", JsonStream.serialize(any));
         assertEquals(100, any.toInt());
         assertEquals(100L, any.toLong());
@@ -78,7 +78,7 @@ public class TestAny extends TestCase {
 
     public void test_null() {
         Any any = Any.wrap((Object) null);
-        assertEquals(ValueType.NULL, any.valueType());
+        assertEquals(InputType.NULL, any.valueType());
         assertEquals("null", JsonStream.serialize(any));
         assertEquals(false, any.toBoolean());
         assertEquals("null", any.toString());
@@ -86,7 +86,7 @@ public class TestAny extends TestCase {
 
     public void test_boolean() {
         Any any = Any.wrap(true);
-        assertEquals(ValueType.BOOLEAN, any.valueType());
+        assertEquals(InputType.BOOLEAN, any.valueType());
         assertEquals("true", JsonStream.serialize(any));
         assertEquals(1, any.toInt());
         assertEquals(1L, any.toLong());
@@ -97,7 +97,7 @@ public class TestAny extends TestCase {
 
     public void test_string() {
         Any any = Any.wrap("hello");
-        assertEquals(ValueType.STRING, any.valueType());
+        assertEquals(InputType.STRING, any.valueType());
         assertEquals("\"hello\"", JsonStream.serialize(any));
         any.set("100");
         assertEquals(100, any.toInt());
@@ -110,7 +110,7 @@ public class TestAny extends TestCase {
 
     public void test_list() {
         Any any = Any.wrap(Arrays.asList(1, 2, 3));
-        assertEquals(ValueType.ARRAY, any.valueType());
+        assertEquals(InputType.ARRAY, any.valueType());
         assertEquals("[1,2,3]", JsonStream.serialize(any));
         assertEquals(Integer.valueOf(1), any.get(0).object());
         assertEquals(true, any.toBoolean());
@@ -119,7 +119,7 @@ public class TestAny extends TestCase {
 
     public void test_array() {
         Any any = Any.wrap(new int[]{1, 2, 3});
-        assertEquals(ValueType.ARRAY, any.valueType());
+        assertEquals(InputType.ARRAY, any.valueType());
         assertEquals("[1,2,3]", JsonStream.serialize(any));
         assertEquals(Integer.valueOf(1), any.get(0).object());
         assertEquals(true, any.toBoolean());
@@ -137,7 +137,7 @@ public class TestAny extends TestCase {
         val.put("hello", 1);
         val.put("world", "!!");
         Any any = Any.wrap(val);
-        assertEquals(ValueType.OBJECT, any.valueType());
+        assertEquals(InputType.OBJECT, any.valueType());
         assertEquals("{\"world\":\"!!\",\"hello\":1}", JsonStream.serialize(any));
         assertEquals(Integer.valueOf(1), any.get("hello").object());
         assertEquals(true, any.toBoolean());
@@ -154,13 +154,13 @@ public class TestAny extends TestCase {
         val.field1 = "hello";
         val.field2 = Any.wrap(new long[]{1, 2});
         Any any = Any.wrap(val);
-        assertEquals(ValueType.OBJECT, any.valueType());
+        assertEquals(InputType.OBJECT, any.valueType());
         assertEquals("{\"field1\":\"hello\",\"field2\":[1,2]}", JsonStream.serialize(any));
     }
 
     public void test_object() {
         Any any = Any.wrap(new Object());
-        assertEquals(ValueType.OBJECT, any.valueType());
+        assertEquals(InputType.OBJECT, any.valueType());
         assertEquals("{}", JsonStream.serialize(new Object()));
     }
 }
