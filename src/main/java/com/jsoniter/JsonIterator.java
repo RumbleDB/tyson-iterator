@@ -496,19 +496,6 @@ public class JsonIterator implements Closeable {
     public InputType whatIsNext() throws IOException {
         InputType inputType = inputTypes[IterImpl.nextToken(this)];
         unreadByte();
-        /*
-        if(inputType == InputType.STRING) {
-        	String lexicalValue = readString();
-        	int backsteps = lexicalValue.length()+3;
-        	if(lexicalValue == "true" || lexicalValue == "false") {
-        		inputType = InputType.BOOLEAN;
-        	} else if(lexicalValue == "null") {
-        		inputType = InputType.NULL;
-        	}
-        }
-        else if(inputType == InputType.NUMBER) {
-        	//TODO
-        }*/
         return inputType;
     }
 

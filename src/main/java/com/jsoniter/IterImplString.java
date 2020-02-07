@@ -55,14 +55,9 @@ class IterImplString {
     public static final String readString(JsonIterator iter) throws IOException {
         byte c = IterImpl.nextToken(iter);
         if (c != '"') {
-            if (c == 'n') {
-                IterImpl.skipFixedBytes(iter, 3);
-                return null;
-            } else {
-            	String res = readUnquotedString(iter);
-            	//System.out.println("read unquoted string " + res);
-            	return (char)c + res;
-            }
+        	String res = readUnquotedString(iter);
+        	//System.out.println("read unquoted string " + res);
+        	return (char)c + res;
             //throw iter.reportError("readString", "expect string or null, but " + (char) c);
         }
         int j = parse(iter);
